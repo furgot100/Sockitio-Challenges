@@ -6,10 +6,15 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
 
+server.listen(3000, () => {
+    console.log('listening on *:3000');
+});
+// File directory
 app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/index.html');
+    res.sendFile(__dirname, 'public');
 });
 
+// Chatroom
 io.on('connection', (socket) => {
     console.log('a user connected');
     
@@ -23,10 +28,3 @@ io.on('connection', (socket) => {
       io.emit('chat message', msg);
     });
 })
-
-
-
-
-server.listen(3000, () => {
-  console.log('listening on *:3000');
-});
