@@ -1,30 +1,30 @@
-const express = require('express');
-const app = express();
-const http = require('http');
-const server = http.createServer(app);
-//added to start socket.io
-const { Server } = require("socket.io");
-const io = new Server(server);
+const app = require('express')();
+const http = require('http').Server(app);
+const io = require('socket.io')(http);
+const port = process.env.PORT || 3000;
 
-server.listen(3000, () => {
-    console.log('listening on *:3000');
-});
-// File directory
 app.get('/', (req, res) => {
-    res.sendFile(__dirname, 'public');
+    res.sendFile(__dirname + '/index.html');
 });
 
-// Chatroom
 io.on('connection', (socket) => {
-    console.log('a user connected');
-    
-    socket.on('joining msg', () => {
-      io.emit('chat message', `User joined`)
+    socket.on('chat message', msg => {
+        io.emit('chat message', msg);
     });
-   
-   
-   
-    socket.on('chat message', (msg) => {
-      io.emit('chat message', msg);
-    });
-})
+
+    socket.on('disconnect', () => {
+        socket.broadcast.emit('user left')
+    })
+
+    console.log("New user connected")
+
+    socket.username = "Anonymous"
+
+    socket.on('change_username', data => {
+        socket.username = data.username
+    })
+});
+
+http.listen(port, () => {
+  console.log(`listening at http://localhost:${port}/`);
+});
